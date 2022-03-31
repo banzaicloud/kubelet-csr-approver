@@ -80,7 +80,7 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
         name: Setup ko
         env:
-          KO_DOCKER_REPO: ghcr.io/banzaicloud/kubelet-csr-approver
+          KO_DOCKER_REPO: ghcr.io/banzaicloud
       - name: Run ko publish
         run: |
           export REF=${{ github.ref}}
@@ -133,7 +133,7 @@ jobs:
       - uses: imjasonh/setup-ko@v0.4
         name: Setup ko
         env:
-          KO_DOCKER_REPO: ghcr.io/banzaicloud/kubelet-csr-approver
+          KO_DOCKER_REPO: ghcr.io/banzaicloud
       - name: Run ko publish
         run: |
           export REF=${{ github.ref}}
@@ -173,35 +173,35 @@ jobs:
   #       with:
   #         token: "${{ secrets.GITHUB_TOKEN }}"
 
-  publish-untagged:
-    needs:
-    - lint
-    - test
-    - check-gh-token
-    if: |
-      !startsWith(github.ref, 'refs/tags/v') &&
-      !github.event.pull_request.head.repo.fork &&
-      needs.check-gh-token.outputs.gh-token == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
-          stable: true
+  # publish-untagged:
+  #   needs:
+  #   - lint
+  #   - test
+  #   - check-gh-token
+  #   if: |
+  #     !startsWith(github.ref, 'refs/tags/v') &&
+  #     !github.event.pull_request.head.repo.fork &&
+  #     needs.check-gh-token.outputs.gh-token == 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: actions/setup-go@v2
+  #       with:
+  #         go-version: 1.17
+  #         stable: true
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - uses: imjasonh/setup-ko@v0.4
-        name: Setup ko
-        env:
-          KO_DOCKER_REPO: ghcr.io/banzaicloud/kubelet-csr-approver
-      - name: Run ko publish
-        run: |
-          export REF=${{ github.ref}}
-          export COMMIT=${{ github.sha}}
-          ko publish ./cmd/kubelet-csr-approver/ --base-import-paths --platform=linux/amd64,linux/arm64,linux/arm
+  #     - name: Login to GitHub Container Registry
+  #       uses: docker/login-action@v1
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
+  #     - uses: imjasonh/setup-ko@v0.4
+  #       name: Setup ko
+  #       env:
+  #         KO_DOCKER_REPO: ghcr.io/banzaicloud
+  #     - name: Run ko publish
+  #       run: |
+  #         export REF=${{ github.ref}}
+  #         export COMMIT=${{ github.sha}}
+  #         ko publish ./cmd/kubelet-csr-approver/ --base-import-paths --platform=linux/amd64,linux/arm64,linux/arm
