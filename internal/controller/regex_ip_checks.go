@@ -16,6 +16,12 @@ import (
 // complies with the provider-specific regex
 // is resolvable (this check can be opted out with a parameter)
 func (r *CertificateSigningRequestReconciler) DNSCheck(ctx context.Context, csr *certificatesv1.CertificateSigningRequest, x509cr *x509.CertificateRequest) (valid bool, reason string, err error) {
+	// bypassing DNS resolution - DNS check is approved
+	if r.BypassDNSResolution {
+		valid = true
+		return valid, reason, nil
+	}
+
 	if valid = (len(x509cr.DNSNames) <= 1); !valid {
 		reason = "The x509 Cert Request contains more than 1 DNS name"
 		return
@@ -38,12 +44,6 @@ func (r *CertificateSigningRequestReconciler) DNSCheck(ctx context.Context, csr 
 	if valid = r.ProviderRegexp(sanDNSName); !valid {
 		reason = "The SAN DNS name in the x509 CR is not allowed by the Cloud provider regex"
 		return
-	}
-
-	// bypassing DNS reslution - DNS check is approved
-	if r.BypassDNSResolution {
-		valid = true
-		return valid, reason, nil
 	}
 
 	dnsCtx, dnsCtxCancel := context.WithDeadline(ctx, time.Now().Add(time.Second)) // 1 second timeout for the dns request
